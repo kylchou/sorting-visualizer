@@ -1,6 +1,9 @@
 const barsContainer = document.getElementById('bars-container');
 const newArrayBtn = document.getElementById('new-array-btn');
 const bubbleSortBtn = document.getElementById('bubble-sort-btn');
+const selectionSortBtn = document.getElementById('selection-sort-btn');
+
+const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn];
 
 let array = [];
 const ARRAY_SIZE = 40;
@@ -43,13 +46,41 @@ async function bubbleSort() {
   render();
 }
 
+async function selectionSort() {
+  for (let i = 0; i < array.length - 1; i++) {
+    let minIndex = i;
+    for (let j = i + 1; j < array.length; j++) {
+      render([minIndex, j]);
+      await sleep(DELAY_MS);
+      if (array[j] < array[minIndex]) {
+        minIndex = j;
+      }
+    }
+    if (minIndex !== i) {
+      [array[i], array[minIndex]] = [array[minIndex], array[i]];
+      render([i, minIndex]);
+      await sleep(DELAY_MS);
+    }
+  }
+  render();
+}
+
+function setControlsDisabled(disabled) {
+  controlButtons.forEach((btn) => {
+    btn.disabled = disabled;
+  });
+}
+
+function attachSortHandler(button, sortFn) {
+  button.addEventListener('click', async () => {
+    setControlsDisabled(true);
+    await sortFn();
+    setControlsDisabled(false);
+  });
+}
+
 newArrayBtn.addEventListener('click', () => generateArray());
-bubbleSortBtn.addEventListener('click', async () => {
-  bubbleSortBtn.disabled = true;
-  newArrayBtn.disabled = true;
-  await bubbleSort();
-  bubbleSortBtn.disabled = false;
-  newArrayBtn.disabled = false;
-});
+attachSortHandler(bubbleSortBtn, bubbleSort);
+attachSortHandler(selectionSortBtn, selectionSort);
 
 generateArray();
