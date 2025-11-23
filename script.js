@@ -3,8 +3,9 @@ const newArrayBtn = document.getElementById('new-array-btn');
 const bubbleSortBtn = document.getElementById('bubble-sort-btn');
 const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
+const mergeSortBtn = document.getElementById('merge-sort-btn');
 
-const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn];
+const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn];
 
 let array = [];
 const ARRAY_SIZE = 40;
@@ -85,6 +86,54 @@ async function insertionSort() {
   render();
 }
 
+// Merge sort mutates `array` in place (writing merged runs back into it) so
+// it can reuse the same render() as every other algorithm here.
+async function mergeSortRange(start, end) {
+  if (end - start <= 1) return;
+  const mid = Math.floor((start + end) / 2);
+  await mergeSortRange(start, mid);
+  await mergeSortRange(mid, end);
+  await merge(start, mid, end);
+}
+
+async function merge(start, mid, end) {
+  const left = array.slice(start, mid);
+  const right = array.slice(mid, end);
+  let i = 0;
+  let j = 0;
+  let k = start;
+
+  while (i < left.length && j < right.length) {
+    render([k]);
+    await sleep(DELAY_MS);
+    if (left[i] <= right[j]) {
+      array[k] = left[i++];
+    } else {
+      array[k] = right[j++];
+    }
+    render([k]);
+    await sleep(DELAY_MS);
+    k++;
+  }
+  while (i < left.length) {
+    array[k] = left[i++];
+    render([k]);
+    await sleep(DELAY_MS);
+    k++;
+  }
+  while (j < right.length) {
+    array[k] = right[j++];
+    render([k]);
+    await sleep(DELAY_MS);
+    k++;
+  }
+}
+
+async function mergeSort() {
+  await mergeSortRange(0, array.length);
+  render();
+}
+
 function setControlsDisabled(disabled) {
   controlButtons.forEach((btn) => {
     btn.disabled = disabled;
@@ -103,5 +152,6 @@ newArrayBtn.addEventListener('click', () => generateArray());
 attachSortHandler(bubbleSortBtn, bubbleSort);
 attachSortHandler(selectionSortBtn, selectionSort);
 attachSortHandler(insertionSortBtn, insertionSort);
+attachSortHandler(mergeSortBtn, mergeSort);
 
 generateArray();
