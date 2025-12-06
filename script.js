@@ -4,12 +4,18 @@ const bubbleSortBtn = document.getElementById('bubble-sort-btn');
 const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
 const mergeSortBtn = document.getElementById('merge-sort-btn');
+const speedSlider = document.getElementById('speed-slider');
 
 const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn];
 
 let array = [];
 const ARRAY_SIZE = 40;
-const DELAY_MS = 20;
+// Slider is 1 (slow) - 100 (fast); invert it into an actual delay in ms.
+let delayMs = 101 - Number(speedSlider.value);
+
+speedSlider.addEventListener('input', () => {
+  delayMs = 101 - Number(speedSlider.value);
+});
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,11 +43,11 @@ async function bubbleSort() {
   for (let i = 0; i < array.length - 1; i++) {
     for (let j = 0; j < array.length - i - 1; j++) {
       render([j, j + 1]);
-      await sleep(DELAY_MS);
+      await sleep(delayMs);
       if (array[j] > array[j + 1]) {
         [array[j], array[j + 1]] = [array[j + 1], array[j]];
         render([j, j + 1]);
-        await sleep(DELAY_MS);
+        await sleep(delayMs);
       }
     }
   }
@@ -53,7 +59,7 @@ async function selectionSort() {
     let minIndex = i;
     for (let j = i + 1; j < array.length; j++) {
       render([minIndex, j]);
-      await sleep(DELAY_MS);
+      await sleep(delayMs);
       if (array[j] < array[minIndex]) {
         minIndex = j;
       }
@@ -61,7 +67,7 @@ async function selectionSort() {
     if (minIndex !== i) {
       [array[i], array[minIndex]] = [array[minIndex], array[i]];
       render([i, minIndex]);
-      await sleep(DELAY_MS);
+      await sleep(delayMs);
     }
   }
   render();
@@ -72,16 +78,16 @@ async function insertionSort() {
     let j = i - 1;
     const current = array[i];
     render([i]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
     while (j >= 0 && array[j] > current) {
       array[j + 1] = array[j];
       render([j, j + 1]);
-      await sleep(DELAY_MS);
+      await sleep(delayMs);
       j--;
     }
     array[j + 1] = current;
     render([j + 1]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
   }
   render();
 }
@@ -105,26 +111,26 @@ async function merge(start, mid, end) {
 
   while (i < left.length && j < right.length) {
     render([k]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
     if (left[i] <= right[j]) {
       array[k] = left[i++];
     } else {
       array[k] = right[j++];
     }
     render([k]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
     k++;
   }
   while (i < left.length) {
     array[k] = left[i++];
     render([k]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
     k++;
   }
   while (j < right.length) {
     array[k] = right[j++];
     render([k]);
-    await sleep(DELAY_MS);
+    await sleep(delayMs);
     k++;
   }
 }
