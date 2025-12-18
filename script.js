@@ -5,11 +5,11 @@ const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
 const mergeSortBtn = document.getElementById('merge-sort-btn');
 const speedSlider = document.getElementById('speed-slider');
+const sizeSlider = document.getElementById('size-slider');
 
-const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn];
+const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn, sizeSlider];
 
 let array = [];
-const ARRAY_SIZE = 40;
 // Slider is 1 (slow) - 100 (fast); invert it into an actual delay in ms.
 let delayMs = 101 - Number(speedSlider.value);
 
@@ -21,10 +21,12 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function generateArray(size = ARRAY_SIZE) {
+function generateArray(size = Number(sizeSlider.value)) {
   array = Array.from({ length: size }, () => Math.floor(Math.random() * 380) + 10);
   render();
 }
+
+sizeSlider.addEventListener('input', () => generateArray());
 
 function render(activeIndices = []) {
   barsContainer.innerHTML = '';

@@ -53,10 +53,13 @@ button:disabled {
   align-items: flex-end;
   justify-content: center;
   height: 400px;
+  max-width: 1000px;
+  margin: 0 auto;
   gap: 2px;
 }
 
 .bar {
   background: #4da6ff;
-  width: 8px;
+  flex: 1 1 0;
+  min-width: 1px;
 }
