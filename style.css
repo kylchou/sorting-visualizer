@@ -48,6 +48,36 @@ button:disabled {
   margin-left: 8px;
 }
 
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #cfcfe6;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.swatch.default {
+  background: #4da6ff;
+}
+
+.swatch.compare {
+  background: #ffd23f;
+}
+
+.swatch.swap {
+  background: #ff5c5c;
+}
+
 #bars-container {
   display: flex;
   align-items: flex-end;

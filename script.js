@@ -28,14 +28,18 @@ function generateArray(size = Number(sizeSlider.value)) {
 
 sizeSlider.addEventListener('input', () => generateArray());
 
-function render(activeIndices = []) {
+// compareIndices = bars currently being looked at (yellow)
+// swapIndices = bars that just moved (red)
+function render(compareIndices = [], swapIndices = []) {
   barsContainer.innerHTML = '';
   array.forEach((value, index) => {
     const bar = document.createElement('div');
     bar.className = 'bar';
     bar.style.height = `${value}px`;
-    if (activeIndices.includes(index)) {
+    if (swapIndices.includes(index)) {
       bar.style.background = '#ff5c5c';
+    } else if (compareIndices.includes(index)) {
+      bar.style.background = '#ffd23f';
     }
     barsContainer.appendChild(bar);
   });
@@ -48,7 +52,7 @@ async function bubbleSort() {
       await sleep(delayMs);
       if (array[j] > array[j + 1]) {
         [array[j], array[j + 1]] = [array[j + 1], array[j]];
-        render([j, j + 1]);
+        render([], [j, j + 1]);
         await sleep(delayMs);
       }
     }
@@ -68,7 +72,7 @@ async function selectionSort() {
     }
     if (minIndex !== i) {
       [array[i], array[minIndex]] = [array[minIndex], array[i]];
-      render([i, minIndex]);
+      render([], [i, minIndex]);
       await sleep(delayMs);
     }
   }
@@ -83,12 +87,12 @@ async function insertionSort() {
     await sleep(delayMs);
     while (j >= 0 && array[j] > current) {
       array[j + 1] = array[j];
-      render([j, j + 1]);
+      render([], [j, j + 1]);
       await sleep(delayMs);
       j--;
     }
     array[j + 1] = current;
-    render([j + 1]);
+    render([], [j + 1]);
     await sleep(delayMs);
   }
   render();
@@ -119,19 +123,19 @@ async function merge(start, mid, end) {
     } else {
       array[k] = right[j++];
     }
-    render([k]);
+    render([], [k]);
     await sleep(delayMs);
     k++;
   }
   while (i < left.length) {
     array[k] = left[i++];
-    render([k]);
+    render([], [k]);
     await sleep(delayMs);
     k++;
   }
   while (j < right.length) {
     array[k] = right[j++];
-    render([k]);
+    render([], [k]);
     await sleep(delayMs);
     k++;
   }
