@@ -93,3 +93,31 @@ button:disabled {
   flex: 1 1 0;
   min-width: 1px;
 }
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .controls {
+    gap: 6px;
+  }
+
+  button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .legend {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #bars-container {
+    height: 260px;
+  }
+}
