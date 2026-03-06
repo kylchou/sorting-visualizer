@@ -152,8 +152,17 @@ function setControlsDisabled(disabled) {
   });
 }
 
-function attachSortHandler(button, sortFn) {
+const complexityInfo = document.getElementById('complexity-info');
+const COMPLEXITY = {
+  Bubble: 'Bubble Sort -- Time: O(n^2) average/worst, O(n) best (already sorted). Space: O(1).',
+  Selection: 'Selection Sort -- Time: O(n^2) in every case. Space: O(1).',
+  Insertion: 'Insertion Sort -- Time: O(n^2) average/worst, O(n) best. Space: O(1).',
+  Merge: 'Merge Sort -- Time: O(n log n) in every case. Space: O(n) for the temporary left/right arrays.',
+};
+
+function attachSortHandler(button, sortFn, label) {
   button.addEventListener('click', async () => {
+    complexityInfo.textContent = COMPLEXITY[label];
     setControlsDisabled(true);
     await sortFn();
     setControlsDisabled(false);
@@ -161,9 +170,9 @@ function attachSortHandler(button, sortFn) {
 }
 
 newArrayBtn.addEventListener('click', () => generateArray());
-attachSortHandler(bubbleSortBtn, bubbleSort);
-attachSortHandler(selectionSortBtn, selectionSort);
-attachSortHandler(insertionSortBtn, insertionSort);
-attachSortHandler(mergeSortBtn, mergeSort);
+attachSortHandler(bubbleSortBtn, bubbleSort, 'Bubble');
+attachSortHandler(selectionSortBtn, selectionSort, 'Selection');
+attachSortHandler(insertionSortBtn, insertionSort, 'Insertion');
+attachSortHandler(mergeSortBtn, mergeSort, 'Merge');
 
 generateArray();
