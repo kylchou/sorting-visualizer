@@ -4,11 +4,20 @@ const bubbleSortBtn = document.getElementById('bubble-sort-btn');
 const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
 const mergeSortBtn = document.getElementById('merge-sort-btn');
+const quickSortBtn = document.getElementById('quick-sort-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const speedSlider = document.getElementById('speed-slider');
 const sizeSlider = document.getElementById('size-slider');
 
-const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn, sizeSlider];
+const controlButtons = [
+  newArrayBtn,
+  bubbleSortBtn,
+  selectionSortBtn,
+  insertionSortBtn,
+  mergeSortBtn,
+  quickSortBtn,
+  sizeSlider,
+];
 
 // Wires up a listener only if the element actually exists. Without this, one
 // missing/mismatched element (e.g. a stale cached copy of index.html served
@@ -133,6 +142,17 @@ const ALGORITHM_CODE = {
     '            arr[k] = left[i]; i += 1',
     '        else:',
     '            arr[k] = right[j]; j += 1',
+  ],
+  Quick: [
+    'function partition(low, high):',
+    '    pivot = arr[high]',
+    '    i = low - 1',
+    '    for j in range(low, high):',
+    '        if arr[j] < pivot:',
+    '            i += 1',
+    '            swap(arr[i], arr[j])',
+    '    swap(arr[i + 1], arr[high])',
+    '    return i + 1',
   ],
 };
 
@@ -282,6 +302,44 @@ async function mergeSort() {
   render();
 }
 
+// Lomuto partition -- pivot is always the last element of the range.
+async function partition(low, high) {
+  const pivot = array[high];
+  let i = low - 1;
+
+  for (let j = low; j < high; j++) {
+    highlightLine(4, 'compare');
+    render([j, high]);
+    await sleep(delayMs);
+    if (array[j] < pivot) {
+      i++;
+      highlightLine(6, 'swap');
+      [array[i], array[j]] = [array[j], array[i]];
+      render([], [i, j]);
+      await sleep(delayMs);
+    }
+  }
+
+  highlightLine(7, 'swap');
+  [array[i + 1], array[high]] = [array[high], array[i + 1]];
+  render([], [i + 1, high]);
+  await sleep(delayMs);
+  return i + 1;
+}
+
+async function quickSortRange(low, high) {
+  if (low >= high) return;
+  const pivotIndex = await partition(low, high);
+  await quickSortRange(low, pivotIndex - 1);
+  await quickSortRange(pivotIndex + 1, high);
+}
+
+async function quickSort() {
+  await quickSortRange(0, array.length - 1);
+  highlightLine(-1);
+  render();
+}
+
 // Sweeps a green highlight from the first bar to the last once a sort
 // finishes, like most other sorting visualizers do for the "done" moment.
 async function runSortedWave() {
@@ -305,6 +363,7 @@ const COMPLEXITY = {
   Selection: 'Selection Sort -- Time: O(n^2) in every case. Space: O(1).',
   Insertion: 'Insertion Sort -- Time: O(n^2) average/worst, O(n) best. Space: O(1).',
   Merge: 'Merge Sort -- Time: O(n log n) in every case. Space: O(n) for the temporary left/right arrays.',
+  Quick: 'Quick Sort -- Time: O(n log n) average, O(n^2) worst (bad pivot choice, e.g. already-sorted input). Space: O(log n) for the recursion stack.',
 };
 
 function attachSortHandler(button, sortFn, label) {
@@ -331,5 +390,6 @@ attachSortHandler(bubbleSortBtn, bubbleSort, 'Bubble');
 attachSortHandler(selectionSortBtn, selectionSort, 'Selection');
 attachSortHandler(insertionSortBtn, insertionSort, 'Insertion');
 attachSortHandler(mergeSortBtn, mergeSort, 'Merge');
+attachSortHandler(quickSortBtn, quickSort, 'Quick');
 
 generateArray();
