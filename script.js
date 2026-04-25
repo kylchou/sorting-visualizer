@@ -5,6 +5,7 @@ const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
 const mergeSortBtn = document.getElementById('merge-sort-btn');
 const quickSortBtn = document.getElementById('quick-sort-btn');
+const heapSortBtn = document.getElementById('heap-sort-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const speedSlider = document.getElementById('speed-slider');
 const sizeSlider = document.getElementById('size-slider');
@@ -16,6 +17,7 @@ const controlButtons = [
   insertionSortBtn,
   mergeSortBtn,
   quickSortBtn,
+  heapSortBtn,
   sizeSlider,
 ];
 
@@ -153,6 +155,22 @@ const ALGORITHM_CODE = {
     '            swap(arr[i], arr[j])',
     '    swap(arr[i + 1], arr[high])',
     '    return i + 1',
+  ],
+  Heap: [
+    'function heapify(n, i):',
+    '    largest = i',
+    '    left, right = 2i + 1, 2i + 2',
+    '    if left < n and arr[left] > arr[largest]:',
+    '        largest = left',
+    '    if right < n and arr[right] > arr[largest]:',
+    '        largest = right',
+    '    if largest != i:',
+    '        swap(arr[i], arr[largest])',
+    '        heapify(n, largest)',
+    '',
+    'for i in range(n - 1, 0, -1):',
+    '    swap(arr[0], arr[i])',
+    '    heapify(i, 0)',
   ],
 };
 
@@ -340,6 +358,45 @@ async function quickSort() {
   render();
 }
 
+// Sift `i` down into a max-heap of size `n`.
+async function heapify(n, i) {
+  let largest = i;
+  const left = 2 * i + 1;
+  const right = 2 * i + 2;
+
+  highlightLine(2, 'compare');
+  render([i, left, right].filter((index) => index < n));
+  await sleep(delayMs);
+
+  if (left < n && array[left] > array[largest]) largest = left;
+  if (right < n && array[right] > array[largest]) largest = right;
+
+  if (largest !== i) {
+    highlightLine(8, 'swap');
+    [array[i], array[largest]] = [array[largest], array[i]];
+    render([], [i, largest]);
+    await sleep(delayMs);
+    await heapify(n, largest);
+  }
+}
+
+async function heapSort() {
+  const n = array.length;
+  // Build the max-heap first, then repeatedly pull the max to the end.
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    await heapify(n, i);
+  }
+  for (let i = n - 1; i > 0; i--) {
+    highlightLine(12, 'swap');
+    [array[0], array[i]] = [array[i], array[0]];
+    render([], [0, i]);
+    await sleep(delayMs);
+    await heapify(i, 0);
+  }
+  highlightLine(-1);
+  render();
+}
+
 // Sweeps a green highlight from the first bar to the last once a sort
 // finishes, like most other sorting visualizers do for the "done" moment.
 async function runSortedWave() {
@@ -364,6 +421,7 @@ const COMPLEXITY = {
   Insertion: 'Insertion Sort -- Time: O(n^2) average/worst, O(n) best. Space: O(1).',
   Merge: 'Merge Sort -- Time: O(n log n) in every case. Space: O(n) for the temporary left/right arrays.',
   Quick: 'Quick Sort -- Time: O(n log n) average, O(n^2) worst (bad pivot choice, e.g. already-sorted input). Space: O(log n) for the recursion stack.',
+  Heap: 'Heap Sort -- Time: O(n log n) in every case. Space: O(1), sorts in place.',
 };
 
 function attachSortHandler(button, sortFn, label) {
@@ -391,5 +449,6 @@ attachSortHandler(selectionSortBtn, selectionSort, 'Selection');
 attachSortHandler(insertionSortBtn, insertionSort, 'Insertion');
 attachSortHandler(mergeSortBtn, mergeSort, 'Merge');
 attachSortHandler(quickSortBtn, quickSort, 'Quick');
+attachSortHandler(heapSortBtn, heapSort, 'Heap');
 
 generateArray();
