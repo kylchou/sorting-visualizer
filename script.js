@@ -9,6 +9,7 @@ const heapSortBtn = document.getElementById('heap-sort-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const speedSlider = document.getElementById('speed-slider');
 const sizeSlider = document.getElementById('size-slider');
+const statusText = document.getElementById('status-text');
 
 const controlButtons = [
   newArrayBtn,
@@ -86,6 +87,7 @@ function createBars() {
 function generateArray(size = Number(sizeSlider.value)) {
   array = Array.from({ length: size }, () => Math.floor(Math.random() * 380) + 10);
   createBars();
+  if (statusText) statusText.textContent = 'Pick an algorithm to start.';
 }
 
 on(sizeSlider, 'input', () => generateArray());
@@ -104,6 +106,17 @@ function render(compareIndices = [], swapIndices = []) {
       bar.style.background = '';
     }
   });
+
+  // Same info as the bar colors, but as text -- so this isn't only readable
+  // by people who can tell yellow from red, and a screen reader (aria-live
+  // on the element) actually has something to announce.
+  if (statusText) {
+    if (swapIndices.length) {
+      statusText.textContent = `Swapping index ${swapIndices.join(' and ')}`;
+    } else if (compareIndices.length) {
+      statusText.textContent = `Comparing index ${compareIndices.join(' and ')}`;
+    }
+  }
 }
 
 // Pseudocode shown in the code panel for each algorithm, plus which line
@@ -439,6 +452,7 @@ function attachSortHandler(button, sortFn, label) {
 
     if (pauseBtn) pauseBtn.disabled = true;
     await runSortedWave();
+    if (statusText) statusText.textContent = 'Sorted!';
     setControlsDisabled(false);
   });
 }

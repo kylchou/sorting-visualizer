@@ -82,6 +82,13 @@ button:disabled {
   background: #4dff88;
 }
 
+#status-text {
+  min-height: 18px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #cfcfe6;
+}
+
 #code-view {
   text-align: left;
   max-width: 480px;
