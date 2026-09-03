@@ -10,11 +10,20 @@ const sizeSlider = document.getElementById('size-slider');
 
 const controlButtons = [newArrayBtn, bubbleSortBtn, selectionSortBtn, insertionSortBtn, mergeSortBtn, sizeSlider];
 
+// Wires up a listener only if the element actually exists. Without this, one
+// missing/mismatched element (e.g. a stale cached copy of index.html served
+// alongside a newer script.js) throws during setup and silently stops every
+// listener after it from ever being attached -- so ALL the buttons would
+// look dead, not just the one tied to the missing element.
+function on(el, event, handler) {
+  if (el) el.addEventListener(event, handler);
+}
+
 let array = [];
 // Slider is 1 (slow) - 100 (fast); invert it into an actual delay in ms.
 let delayMs = 101 - Number(speedSlider.value);
 
-speedSlider.addEventListener('input', () => {
+on(speedSlider, 'input', () => {
   delayMs = 101 - Number(speedSlider.value);
 });
 
@@ -36,7 +45,7 @@ async function sleep(ms) {
   await waitIfPaused();
 }
 
-pauseBtn.addEventListener('click', () => {
+on(pauseBtn, 'click', () => {
   isPaused = !isPaused;
   pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
   if (!isPaused && resumeCallback) {
@@ -68,7 +77,7 @@ function generateArray(size = Number(sizeSlider.value)) {
   createBars();
 }
 
-sizeSlider.addEventListener('input', () => generateArray());
+on(sizeSlider, 'input', () => generateArray());
 
 // compareIndices = bars currently being looked at (yellow)
 // swapIndices = bars that just moved (red)
@@ -200,7 +209,7 @@ async function runSortedWave() {
 
 function setControlsDisabled(disabled) {
   controlButtons.forEach((btn) => {
-    btn.disabled = disabled;
+    if (btn) btn.disabled = disabled;
   });
 }
 
@@ -213,22 +222,24 @@ const COMPLEXITY = {
 };
 
 function attachSortHandler(button, sortFn, label) {
-  button.addEventListener('click', async () => {
+  on(button, 'click', async () => {
     complexityInfo.textContent = COMPLEXITY[label];
     setControlsDisabled(true);
     isPaused = false;
-    pauseBtn.textContent = 'Pause';
-    pauseBtn.disabled = false;
+    if (pauseBtn) {
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.disabled = false;
+    }
 
     await sortFn();
 
-    pauseBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = true;
     await runSortedWave();
     setControlsDisabled(false);
   });
 }
 
-newArrayBtn.addEventListener('click', () => generateArray());
+on(newArrayBtn, 'click', () => generateArray());
 attachSortHandler(bubbleSortBtn, bubbleSort, 'Bubble');
 attachSortHandler(selectionSortBtn, selectionSort, 'Selection');
 attachSortHandler(insertionSortBtn, insertionSort, 'Insertion');
