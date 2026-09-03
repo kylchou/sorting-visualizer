@@ -4,6 +4,7 @@ const bubbleSortBtn = document.getElementById('bubble-sort-btn');
 const selectionSortBtn = document.getElementById('selection-sort-btn');
 const insertionSortBtn = document.getElementById('insertion-sort-btn');
 const mergeSortBtn = document.getElementById('merge-sort-btn');
+const pauseBtn = document.getElementById('pause-btn');
 const speedSlider = document.getElementById('speed-slider');
 const sizeSlider = document.getElementById('size-slider');
 
@@ -17,9 +18,33 @@ speedSlider.addEventListener('input', () => {
   delayMs = 101 - Number(speedSlider.value);
 });
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// Pausing works by having every sleep() also block on this after its timer
+// fires, so a pause always lands on a clean step boundary instead of cutting
+// an animation off mid-way.
+let isPaused = false;
+let resumeCallback = null;
+
+function waitIfPaused() {
+  if (!isPaused) return Promise.resolve();
+  return new Promise((resolve) => {
+    resumeCallback = resolve;
+  });
 }
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  await waitIfPaused();
+}
+
+pauseBtn.addEventListener('click', () => {
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+  if (!isPaused && resumeCallback) {
+    const resume = resumeCallback;
+    resumeCallback = null;
+    resume();
+  }
+});
 
 // One persistent <div> per bar, reused across renders. Rebuilding every bar
 // from scratch on every frame (like we used to) meant a swap just popped to
@@ -162,6 +187,17 @@ async function mergeSort() {
   render();
 }
 
+// Sweeps a green highlight from the first bar to the last once a sort
+// finishes, like most other sorting visualizers do for the "done" moment.
+async function runSortedWave() {
+  const totalDurationMs = 700;
+  const perBar = Math.max(totalDurationMs / array.length, 4);
+  for (let i = 0; i < array.length; i++) {
+    barElements[i].style.background = '#4dff88';
+    await sleep(perBar);
+  }
+}
+
 function setControlsDisabled(disabled) {
   controlButtons.forEach((btn) => {
     btn.disabled = disabled;
@@ -180,7 +216,14 @@ function attachSortHandler(button, sortFn, label) {
   button.addEventListener('click', async () => {
     complexityInfo.textContent = COMPLEXITY[label];
     setControlsDisabled(true);
+    isPaused = false;
+    pauseBtn.textContent = 'Pause';
+    pauseBtn.disabled = false;
+
     await sortFn();
+
+    pauseBtn.disabled = true;
+    await runSortedWave();
     setControlsDisabled(false);
   });
 }

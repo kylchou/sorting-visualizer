@@ -78,6 +78,10 @@ button:disabled {
   background: #ff5c5c;
 }
 
+.swatch.sorted {
+  background: #4dff88;
+}
+
 #bars-container {
   display: flex;
   align-items: flex-end;
