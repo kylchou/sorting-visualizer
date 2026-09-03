@@ -21,9 +21,26 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// One persistent <div> per bar, reused across renders. Rebuilding every bar
+// from scratch on every frame (like we used to) meant a swap just popped to
+// its new height instantly -- keeping the same element and only changing its
+// height/color lets the CSS transition actually animate the swap.
+let barElements = [];
+
+function createBars() {
+  barsContainer.innerHTML = '';
+  barElements = array.map((value) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = `${value}px`;
+    barsContainer.appendChild(bar);
+    return bar;
+  });
+}
+
 function generateArray(size = Number(sizeSlider.value)) {
   array = Array.from({ length: size }, () => Math.floor(Math.random() * 380) + 10);
-  render();
+  createBars();
 }
 
 sizeSlider.addEventListener('input', () => generateArray());
@@ -31,17 +48,16 @@ sizeSlider.addEventListener('input', () => generateArray());
 // compareIndices = bars currently being looked at (yellow)
 // swapIndices = bars that just moved (red)
 function render(compareIndices = [], swapIndices = []) {
-  barsContainer.innerHTML = '';
   array.forEach((value, index) => {
-    const bar = document.createElement('div');
-    bar.className = 'bar';
+    const bar = barElements[index];
     bar.style.height = `${value}px`;
     if (swapIndices.includes(index)) {
       bar.style.background = '#ff5c5c';
     } else if (compareIndices.includes(index)) {
       bar.style.background = '#ffd23f';
+    } else {
+      bar.style.background = '';
     }
-    barsContainer.appendChild(bar);
   });
 }
 

@@ -92,6 +92,7 @@ button:disabled {
   background: #4da6ff;
   flex: 1 1 0;
   min-width: 1px;
+  transition: height 120ms ease, background-color 120ms ease;
 }
 
 @media (max-width: 600px) {
