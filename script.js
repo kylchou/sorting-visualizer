@@ -95,18 +95,88 @@ function render(compareIndices = [], swapIndices = []) {
   });
 }
 
+// Pseudocode shown in the code panel for each algorithm, plus which line
+// number corresponds to each step so the sort functions below can highlight
+// the line that matches what's currently animating in the bars.
+const ALGORITHM_CODE = {
+  Bubble: [
+    'for i in range(n - 1):',
+    '    for j in range(n - i - 1):',
+    '        if arr[j] > arr[j + 1]:',
+    '            swap(arr[j], arr[j + 1])',
+  ],
+  Selection: [
+    'for i in range(n - 1):',
+    '    min_index = i',
+    '    for j in range(i + 1, n):',
+    '        if arr[j] < arr[min_index]:',
+    '            min_index = j',
+    '    if min_index != i:',
+    '        swap(arr[i], arr[min_index])',
+  ],
+  Insertion: [
+    'for i in range(1, n):',
+    '    current = arr[i]',
+    '    j = i - 1',
+    '    while j >= 0 and arr[j] > current:',
+    '        arr[j + 1] = arr[j]',
+    '        j -= 1',
+    '    arr[j + 1] = current',
+  ],
+  Merge: [
+    'function merge(start, mid, end):',
+    '    left = arr[start:mid]',
+    '    right = arr[mid:end]',
+    '    i = j = 0',
+    '    for k in range(start, end):',
+    '        if left[i] <= right[j]:',
+    '            arr[k] = left[i]; i += 1',
+    '        else:',
+    '            arr[k] = right[j]; j += 1',
+  ],
+};
+
+const codeView = document.getElementById('code-view');
+
+function renderCode(label) {
+  if (!codeView) return;
+  codeView.textContent = '';
+  ALGORITHM_CODE[label].forEach((line, index) => {
+    const span = document.createElement('span');
+    span.className = 'code-line';
+    span.dataset.line = String(index);
+    span.textContent = line;
+    codeView.appendChild(span);
+    codeView.appendChild(document.createTextNode('\n'));
+  });
+}
+
+// type is 'compare' (yellow, matches the bar highlight) or 'swap' (red).
+// Pass line = -1 to clear the highlight once a sort finishes.
+function highlightLine(line, type) {
+  if (!codeView) return;
+  codeView.querySelectorAll('.code-line').forEach((el) => {
+    const isActive = Number(el.dataset.line) === line;
+    el.classList.toggle('active-compare', isActive && type === 'compare');
+    el.classList.toggle('active-swap', isActive && type === 'swap');
+  });
+}
+
 async function bubbleSort() {
   for (let i = 0; i < array.length - 1; i++) {
     for (let j = 0; j < array.length - i - 1; j++) {
+      highlightLine(2, 'compare');
       render([j, j + 1]);
       await sleep(delayMs);
       if (array[j] > array[j + 1]) {
+        highlightLine(3, 'swap');
         [array[j], array[j + 1]] = [array[j + 1], array[j]];
         render([], [j, j + 1]);
         await sleep(delayMs);
       }
     }
   }
+  highlightLine(-1);
   render();
 }
 
@@ -114,6 +184,7 @@ async function selectionSort() {
   for (let i = 0; i < array.length - 1; i++) {
     let minIndex = i;
     for (let j = i + 1; j < array.length; j++) {
+      highlightLine(3, 'compare');
       render([minIndex, j]);
       await sleep(delayMs);
       if (array[j] < array[minIndex]) {
@@ -121,11 +192,13 @@ async function selectionSort() {
       }
     }
     if (minIndex !== i) {
+      highlightLine(6, 'swap');
       [array[i], array[minIndex]] = [array[minIndex], array[i]];
       render([], [i, minIndex]);
       await sleep(delayMs);
     }
   }
+  highlightLine(-1);
   render();
 }
 
@@ -135,16 +208,23 @@ async function insertionSort() {
     const current = array[i];
     render([i]);
     await sleep(delayMs);
-    while (j >= 0 && array[j] > current) {
+    while (j >= 0) {
+      highlightLine(3, 'compare');
+      render([j]);
+      await sleep(delayMs);
+      if (array[j] <= current) break;
+      highlightLine(4, 'swap');
       array[j + 1] = array[j];
       render([], [j, j + 1]);
       await sleep(delayMs);
       j--;
     }
+    highlightLine(6, 'swap');
     array[j + 1] = current;
     render([], [j + 1]);
     await sleep(delayMs);
   }
+  highlightLine(-1);
   render();
 }
 
@@ -166,11 +246,14 @@ async function merge(start, mid, end) {
   let k = start;
 
   while (i < left.length && j < right.length) {
+    highlightLine(5, 'compare');
     render([k]);
     await sleep(delayMs);
     if (left[i] <= right[j]) {
+      highlightLine(6, 'swap');
       array[k] = left[i++];
     } else {
+      highlightLine(8, 'swap');
       array[k] = right[j++];
     }
     render([], [k]);
@@ -178,12 +261,14 @@ async function merge(start, mid, end) {
     k++;
   }
   while (i < left.length) {
+    highlightLine(6, 'swap');
     array[k] = left[i++];
     render([], [k]);
     await sleep(delayMs);
     k++;
   }
   while (j < right.length) {
+    highlightLine(8, 'swap');
     array[k] = right[j++];
     render([], [k]);
     await sleep(delayMs);
@@ -193,6 +278,7 @@ async function merge(start, mid, end) {
 
 async function mergeSort() {
   await mergeSortRange(0, array.length);
+  highlightLine(-1);
   render();
 }
 
@@ -224,6 +310,7 @@ const COMPLEXITY = {
 function attachSortHandler(button, sortFn, label) {
   on(button, 'click', async () => {
     complexityInfo.textContent = COMPLEXITY[label];
+    renderCode(label);
     setControlsDisabled(true);
     isPaused = false;
     if (pauseBtn) {

@@ -82,6 +82,39 @@ button:disabled {
   background: #4dff88;
 }
 
+#code-view {
+  text-align: left;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  background: #14141f;
+  border: 1px solid #3a3a55;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+  overflow-x: auto;
+  color: #cfcfe6;
+}
+
+.code-line {
+  display: block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.code-line.active-compare {
+  background: rgba(255, 210, 63, 0.18);
+  color: #ffd23f;
+}
+
+.code-line.active-swap {
+  background: rgba(255, 92, 92, 0.18);
+  color: #ff5c5c;
+}
+
 #bars-container {
   display: flex;
   align-items: flex-end;
@@ -120,6 +153,11 @@ button:disabled {
   .legend {
     flex-wrap: wrap;
     gap: 10px;
+  }
+
+  #code-view {
+    font-size: 11px;
+    max-width: 100%;
   }
 
   #bars-container {
